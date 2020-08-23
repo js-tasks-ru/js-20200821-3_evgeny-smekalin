@@ -5,5 +5,9 @@
  * @returns {number}
  */
 export default function sum(m, n) {
+  if (isNaN(m) || isNaN(n)) {
+    throw 'Argument is not a number';
+  }
 
+  return m + n;
 }
