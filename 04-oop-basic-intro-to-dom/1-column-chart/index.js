@@ -1,22 +1,32 @@
 export default class ColumnChart {
   element; // HTMLElement;
+  subElements = {};
   chartHeight = 50;
 
-  constructor(data) {
+  constructor({
+    data = [],
+    label = '',
+    value = 0,
+    link = '',
+  } = {}) {
     this.data = data;
+    this.label = label;
+    this.value = value;
+    this.link = link;
+
     this.render();
   }
 
   get template() {
     return `
-        <div class="column-chart ${this.isDataExist() ? '' : 'column-chart_loading'}" style="--chart-height: 50">
+        <div class="column-chart ${this.data.length > 0 ? '' : 'column-chart_loading'}" style="--chart-height: 50">
           <div class="column-chart__title">
             ${this.getLabel()}
             ${this.getLink()}
           </div>
           <div class="column-chart__container">
             <div data-element="header" class="column-chart__header">
-              ${this.getValue()}
+              ${this.value}
             </div>
             <div data-element="body" class="column-chart__chart">
               ${this.getColumns()}
@@ -26,56 +36,25 @@ export default class ColumnChart {
     `;
   }
 
-  isDataExist() {
-    return this.data?.data && this.data.data.length > 0
-  }
-
   getLabel() {
-    if (! this.data?.label) {
-      return '';
-    }
-
-    return 'Total ' + this.data.label;
+    return this.label ? 'Total ' + this.label : '';
   }
 
   getLink() {
-    if (! this.data?.link) {
-      return '';
-    }
-
-    return `<a class="column-chart__link" href="${this.data.link}">View all</a>`;
-  }
-
-  getValue() {
-    if (! this.data?.value) {
-      return '';
-    }
-
-    return this.data.value;
+    return this.link ? `<a class="column-chart__link" href="${this.link}">View all</a>` : '';
   }
 
   getColumns() {
-    if (! this.isDataExist()) {
-      return '';
-    }
+    const maxValue = Math.max(...this.data);
+    const chartRatio = this.chartHeight / Math.max(...this.data);
 
-    const chart = [];
-    const maxValue = Math.max(...this.data.data);
-    const chartRatio = this.chartHeight / Math.max(...this.data.data);
+    return this.data.map(value => {
+      const heigh = Math.floor(chartRatio * value)
+      const percent = (value / maxValue * 100).toFixed(0);
 
-    this.data.data.forEach(value => {
-      const heigh = parseInt(chartRatio * value)
-      const percent = Math.round(value / maxValue * 100);
-
-      chart.push(`<div style="--value: ${heigh}" data-tooltip="${percent}%"></div>`);
+      return `<div style="--value: ${heigh}" data-tooltip="${percent}%"></div>`;
     })
-
-    return chart.join('');
-  }
-
-  update(newData) {
-    this.data = newData;
-    this.render();
+    .join('');
   }
 
   render() {
@@ -84,6 +63,22 @@ export default class ColumnChart {
     element.innerHTML = this.template;
 
     this.element = element.firstElementChild;
+    this.subElements = this.getSubElements(this.element)
+  }
+
+  getSubElements(element) {
+    const subElements = element.querySelectorAll('[data-element]')
+
+    return [...subElements].reduce((accum, subElement) => {
+      accum[subElement.dataset.element] = subElement;
+
+      return accum;
+    }, {});
+  }
+
+  update(newData = []) {
+    this.data = newData;
+    this.subElements.body.innerHTML = this.getColumns();
   }
 
   remove () {
@@ -92,5 +87,7 @@ export default class ColumnChart {
 
   destroy() {
     this.remove();
+    this.element = null;
+    this.subElements = {};
   }
 }
