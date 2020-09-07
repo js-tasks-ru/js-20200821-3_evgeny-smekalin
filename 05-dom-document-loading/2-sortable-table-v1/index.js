@@ -122,7 +122,7 @@ export default class SortableTable {
 
     if (this.headerElements[fieldValue].sortType === 'string') {
       sortedData = [...this.data].sort((row1, row2) =>
-        direction * row1[fieldValue].localeCompare(row2[fieldValue], 'default', {caseFirst: 'upper'})
+        direction * row1[fieldValue].localeCompare(row2[fieldValue], ['ru', 'en'], {caseFirst: 'upper'})
       );
     }
 
