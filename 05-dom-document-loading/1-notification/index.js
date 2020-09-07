@@ -1,5 +1,7 @@
 export default class NotificationMessage {
   element;
+  static shownElement;
+  static timer;
 
   constructor(label = '', {
     duration = 0,
@@ -36,35 +38,29 @@ export default class NotificationMessage {
     this.element = element.firstElementChild;
   }
 
-  removeIfShown() {
-    const notification = document.querySelector('div.notification');
-
-    if (notification) {
-      notification.remove();
-    }
-  }
-
   show(targetElement) {
-    if (targetElement) {
+    if (NotificationMessage.timer) {
+      clearTimeout(NotificationMessage.timer);
+      this.remove();
+    }
+
+     if (targetElement) {
       targetElement.append(this.element);
       this.element = targetElement;
+    } else {
+      document.body.append(this.element);
     }
 
-    this.removeIfShown();
+    NotificationMessage.shownElement = this.element;
 
-    document.body.append(this.element);
-
-    setTimeout(() => {
+    NotificationMessage.timer = setTimeout(() => {
       this.remove();
     }, this.duration);
   }
 
-  update() {
-
-  }
-
   remove () {
-    this.element.remove();
+    NotificationMessage.shownElement.remove();
+    NotificationMessage.timer = null;
   }
 
   destroy() {

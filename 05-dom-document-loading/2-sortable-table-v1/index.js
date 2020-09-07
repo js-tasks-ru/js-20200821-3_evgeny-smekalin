@@ -10,10 +10,7 @@ export default class SortableTable {
 
 
     this.render();
-    this.initEventListeners();
   }
-
-  initEventListeners() {}
 
   get template() {
     return `
