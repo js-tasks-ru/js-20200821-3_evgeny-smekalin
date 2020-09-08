@@ -1,7 +1,5 @@
 export default class NotificationMessage {
-  element;
   static shownElement;
-  static timer;
 
   constructor(label = '', {
     duration = 0,
@@ -10,6 +8,10 @@ export default class NotificationMessage {
     this.label = label;
     this.duration = duration;
     this.type = type;
+
+    if (NotificationMessage.shownElement) {
+      NotificationMessage.shownElement.remove();
+    }
 
     this.render();
   }
@@ -36,31 +38,19 @@ export default class NotificationMessage {
     element.innerHTML = this.template;
 
     this.element = element.firstElementChild;
+    NotificationMessage.shownElement = this.element;
   }
 
-  show(targetElement) {
-    if (NotificationMessage.timer) {
-      clearTimeout(NotificationMessage.timer);
-      this.remove();
-    }
+  show(targetElement = document.body) {
+    targetElement.append(this.element);
 
-     if (targetElement) {
-      targetElement.append(this.element);
-      this.element = targetElement;
-    } else {
-      document.body.append(this.element);
-    }
-
-    NotificationMessage.shownElement = this.element;
-
-    NotificationMessage.timer = setTimeout(() => {
+    setTimeout(() => {
       this.remove();
     }, this.duration);
   }
 
   remove () {
-    NotificationMessage.shownElement.remove();
-    NotificationMessage.timer = null;
+    this.element.remove();
   }
 
   destroy() {
