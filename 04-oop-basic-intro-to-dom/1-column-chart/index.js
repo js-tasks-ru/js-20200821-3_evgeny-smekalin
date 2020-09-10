@@ -63,7 +63,7 @@ export default class ColumnChart {
     element.innerHTML = this.template;
 
     this.element = element.firstElementChild;
-    this.subElements = this.getSubElements(this.element)
+    this.subElements = this.getSubElements(this.element);
   }
 
   getSubElements(element) {
